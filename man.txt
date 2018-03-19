@@ -1,0 +1,79 @@
++overview
+J bindings for C library routines and stdin/stdout tasks
+J uses C name except that fopen is sopen etc.
+
++stream
+  s=. sopen_jc_  'foo.txt';'w'
+  s=. sdopen_jc_ fd;'w'
+      sclose_jc_ s
+      swrite_jc_ s;'data'
+  d=. sread_jc_  s,n or _1 for all
+  b=. stell_jc_  s
+      sseek_jc_  s,n   
+
++fd (file descriptors)
+  f=. open_jc_  'foo.txt';'rdwr creat nonblock'
+      close_jc_ f
+      write_jc_ f;'data'
+  d=. read_jc_  r,n or _1 for all
+  b=. tell_jc_  f
+      seek_jc_  f,n
+      
++file names
+      unlink_jc_ 'foo.txt'
+
++system
+  stdin/stdout/stderr redirection supported
+      system_jc_  'ls -l >foo.txt'
+      system_jc_  'sleep 5'
+      system_jc_  'sleep 20 &'
+      systemr_jc_ 'ls -l'     NB. return stdout
+
+      system_jc_  'dir'
+      systemr_jc_ 'dir'
+
++run task (stdin/stdout) and return stdout
+  J=: '/jconsole',~jpath'~bin'
+      J run_jc_ 'i.2 3 4',LF,'BINPATH',LF
+      J run_jc_ 'i.23';'|.BINPATH'
+      J run_jc_ fread'...'
+        
+      'bash'run_jc_'cd gitdev';'ls'
+
++run task interactively
+  not in windows because no tail to feed new lines to stdin
+  b=: 'bash'conew'jc'
+      do__b'ps -a'
+      gt__b 0 NB. wait 0 seconds for output
+      destroy__b''
+        
+  j=: ('/jconsole',~jpath'~bin')conew'jc'
+      do__j'|.BINPATH'
+      do__j'i.3 4'
+      gt__j 0 NB. note 3 blank prompt in front of 0
+      do__j'i.23[6!:3[5' NB. no output for 5 secs
+      gt__j 0 NB. no output
+      gt__j 8 NB. poll for 8 secs until there is output
+      fread pout__j NB. read output file
+      
++clean stdout
+  start of output for an input is not marked
+  stdout has prompts that can mess up display
+  display can be improved by replacing prompts with LFs
+      '   ' clean_jc_ fread stdout_file NB. replace '   ' prompt with LFs
+      
++windows
+  UTF-8 not supported
+   requires conversion to wchar and use of wchar routines
+   
+  system adds 'cmd /s /c ' to arg as this helps with quotes
+
+  system & (background) not supported in windows
+
+  run task interactively - not supported in windows
+   unix facility uses tail to pipe new lines to command
+
+  fd open/close leaves file such that ferase/unlink fail
+   restart does not clear the problem!
+   windows explorer delete works!
+)
