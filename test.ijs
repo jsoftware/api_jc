@@ -46,7 +46,7 @@ assert 0=status_jc_
 
 assert 0~:system_jc_'asdfasdf'
 
-j=: '/jconsole',~jpath'~bin'
+j=: ((IFUNIX>'/'e.LIBFILE){::'/jconsole';'/ijconsole'),~jpath'~bin'
 r=: '   'clean_jc_ j run_jc_ 'i.2 3 4',LF,'BINPATH',LF
 assert' 0  1  2  3'-:>{.<;._2 r-.CR
 
